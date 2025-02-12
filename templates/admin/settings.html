@@ -1,0 +1,166 @@
+{% extends "admin/base.html" %}
+
+{% block admin_content %}
+<div class="admin-settings">
+    <h2>Settings</h2>
+    
+    <div class="settings-section">
+        <h3>AI Configuration</h3>
+        <form method="POST" action="{{ url_for('admin.update_ai_settings') }}" class="settings-form">
+            <div class="form-group">
+                <label for="nebius_api_key">Nebius API Key</label>
+                <div class="api-key-input">
+                    <input type="password" id="nebius_api_key" name="nebius_api_key" 
+                           value="{{ '•' * 20 if nebius_api_key else '' }}"
+                           placeholder="Enter Nebius API Key"
+                           data-tooltip="Your Nebius AI Studio API key for AI features">
+                    <button type="button" class="toggle-password" onclick="togglePassword('nebius_api_key')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="model_name">AI Model</label>
+                <select id="model_name" name="model_name" data-tooltip="Select the AI model to use for generation">
+                    <option value="meta-llama/Meta-Llama-3.1-70B-Instruct" 
+                            {% if model_name == 'meta-llama/Meta-Llama-3.1-70B-Instruct' %}selected{% endif %}>
+                        Meta-Llama 3.1 70B Instruct
+                    </option>
+                    <!-- Add other model options here -->
+                </select>
+            </div>
+        </form>
+    </div>
+    
+    <div class="settings-section">
+        <h3>Blog Generation Settings</h3>
+        <form method="POST" action="{{ url_for('admin.update_blog_settings') }}" class="settings-form">
+            <div class="form-group">
+                <label for="blog_frequency">Blog Post Generation Frequency</label>
+                <div class="frequency-settings">
+                    <input type="number" id="posts_per_day" name="posts_per_day" 
+                           value="{{ posts_per_day }}" min="1" max="10"
+                           data-tooltip="Number of blog posts to generate per day">
+                    <span>posts per</span>
+                    <input type="number" id="days_interval" name="days_interval" 
+                           value="{{ days_interval }}" min="1" max="7"
+                           data-tooltip="Interval in days between generations">
+                    <span>days</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Blog Categories</label>
+                <div class="blog-categories" data-tooltip="Select topics for blog post generation">
+                    {% for category in blog_categories %}
+                    <div class="category-item">
+                        <input type="checkbox" id="cat_{{ category.id }}" name="categories[]" 
+                               value="{{ category.id }}" {% if category.enabled %}checked{% endif %}>
+                        <label for="cat_{{ category.id }}">{{ category.name }}</label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Save Settings</button>
+        </form>
+    </div>
+</div>
+
+<style>
+.admin-settings {
+    padding: 20px;
+}
+
+.settings-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.settings-form {
+    max-width: 600px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.api-key-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toggle-password {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--secondary-color);
+}
+
+.frequency-settings {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.frequency-settings input[type="number"] {
+    width: 60px;
+}
+
+.blog-categories {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.category-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Tooltip Styles */
+[data-tooltip] {
+    position: relative;
+}
+
+[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    background: var(--secondary-color);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    white-space: nowrap;
+    z-index: 1000;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 10px;
+}
+</style>
+
+<script>
+function togglePassword(inputId) {
+    const input = document.getElementById(inputId);
+    const button = input.nextElementSibling;
+    const icon = button.querySelector('i');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+</script>
+{% endblock %}

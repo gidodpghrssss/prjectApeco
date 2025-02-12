@@ -1,0 +1,16 @@
+[Unit]
+Description=Real Estate Blog Post Generator
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/path/to/ai-real-estate
+Environment=PYTHONPATH=/path/to/ai-real-estate
+Environment=NEBIUS_API_KEY=your_api_key_here
+ExecStart=/usr/bin/python3 scripts/blog_scheduler.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

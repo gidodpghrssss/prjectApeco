@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Search Properties - AI Real Estate{% endblock %}
+
+{% block content %}
+<div id="search-app">
+    <div class="row">
+        <!-- Search Filters -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Search Filters</h5>
+                    <form @submit.prevent="searchProperties">
+                        <div class="mb-3">
+                            <label class="form-label">Price Range</label>
+                            <div class="input-group mb-2">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" v-model="filters.min_price" placeholder="Min">
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" v-model="filters.max_price" placeholder="Max">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Property Type</label>
+                            <select class="form-select" v-model="filters.property_type">
+                                <option value="">All Types</option>
+                                <option value="house">House</option>
+                                <option value="apartment">Apartment</option>
+                                <option value="condo">Condo</option>
+                                <option value="townhouse">Townhouse</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Bedrooms</label>
+                            <select class="form-select" v-model="filters.bedrooms">
+                                <option value="">Any</option>
+                                <option v-for="n in 5" :value="n">[[ n ]]+ Bedrooms</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Bathrooms</label>
+                            <select class="form-select" v-model="filters.bathrooms">
+                                <option value="">Any</option>
+                                <option v-for="n in 4" :value="n">[[ n ]]+ Bathrooms</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Search</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Results -->
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Properties [[properties.length ? `(${properties.length})` : '']]</h2>
+                <div class="btn-group">
+                    <button class="btn btn-outline-secondary" :class="{ active: viewMode === 'grid' }" @click="viewMode = 'grid'">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button class="btn btn-outline-secondary" :class="{ active: viewMode === 'list' }" @click="viewMode = 'list'">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div v-if="loading" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+
+            <!-- Grid View -->
+            <div v-else-if="viewMode === 'grid'" class="row">
+                <div v-for="property in properties" :key="property.id" class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <img :src="property.image_url || '/static/images/placeholder.jpg'" class="card-img-top" :alt="property.title">
+                        <div class="card-body">
+                            <h5 class="card-title">[[property.title]]</h5>
+                            <p class="price">${[[ formatPrice(property.price) ]]}</p>
+                            <p class="card-text">[[property.description.substring(0, 100)]]...</p>
+                            <ul class="property-features">
+                                <li><i class="fas fa-bed"></i> [[property.bedrooms]] beds</li>
+                                <li><i class="fas fa-bath"></i> [[property.bathrooms]] baths</li>
+                                <li><i class="fas fa-ruler-combined"></i> [[property.square_feet]] sq ft</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer">
+                            <a :href="'/property/' + property.id" class="btn btn-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- List View -->
+            <div v-else class="list-view">
+                <div v-for="property in properties" :key="property.id" class="card mb-3">
+                    <div class="row g-0">
+                        <div class="col-md-4">
+                            <img :src="property.image_url || '/static/images/placeholder.jpg'" class="img-fluid rounded-start" :alt="property.title">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <h5 class="card-title">[[property.title]]</h5>
+                                <p class="price">${[[ formatPrice(property.price) ]]}</p>
+                                <p class="card-text">[[property.description]]</p>
+                                <ul class="property-features">
+                                    <li><i class="fas fa-bed"></i> [[property.bedrooms]] beds</li>
+                                    <li><i class="fas fa-bath"></i> [[property.bathrooms]] baths</li>
+                                    <li><i class="fas fa-ruler-combined"></i> [[property.square_feet]] sq ft</li>
+                                </ul>
+                                <a :href="'/property/' + property.id" class="btn btn-primary">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- No Results -->
+            <div v-if="!loading && properties.length === 0" class="text-center py-5">
+                <h3>No properties found</h3>
+                <p>Try adjusting your search filters</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const app = Vue.createApp({
+    delimiters: ['[[', ']]'],
+    data() {
+        return {
+            filters: {
+                min_price: '',
+                max_price: '',
+                property_type: '',
+                bedrooms: '',
+                bathrooms: ''
+            },
+            properties: [],
+            loading: false,
+            viewMode: 'grid'
+        }
+    },
+    methods: {
+        async searchProperties() {
+            this.loading = true;
+            try {
+                const response = await fetch('/api/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(this.filters)
+                });
+                const data = await response.json();
+                this.properties = data;
+            } catch (error) {
+                console.error('Error searching properties:', error);
+            } finally {
+                this.loading = false;
+            }
+        },
+        formatPrice(price) {
+            return new Intl.NumberFormat().format(price);
+        }
+    },
+    mounted() {
+        this.searchProperties();
+    }
+}).mount('#search-app');
+</script>
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}{{ property.title }} - AI Real Estate{% endblock %}
+
+{% block content %}
+<div class="property-detail">
+    <!-- Property Images Carousel -->
+    <div id="propertyCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            {% if property.images %}
+                {% for image in property.images %}
+                    <div class="carousel-item {% if loop.first %}active{% endif %}">
+                        <img src="{{ image.url }}" class="d-block w-100" alt="{{ property.title }}">
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="carousel-item active">
+                    <img src="{{ url_for('static', filename='images/placeholder.jpg') }}" class="d-block w-100" alt="{{ property.title }}">
+                </div>
+            {% endif %}
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#propertyCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#propertyCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+        </button>
+    </div>
+
+    <div class="row">
+        <!-- Property Details -->
+        <div class="col-md-8">
+            <h1 class="mb-3">{{ property.title }}</h1>
+            <p class="lead text-primary mb-4">${{ "{:,.2f}".format(property.price) }}</p>
+            
+            <div class="property-features mb-4">
+                <div class="row">
+                    <div class="col-4">
+                        <div class="feature-item">
+                            <i class="fas fa-bed"></i>
+                            <span>{{ property.bedrooms }} Bedrooms</span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="feature-item">
+                            <i class="fas fa-bath"></i>
+                            <span>{{ property.bathrooms }} Bathrooms</span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="feature-item">
+                            <i class="fas fa-ruler-combined"></i>
+                            <span>{{ property.square_meters }} m²</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Description</h3>
+            <p>{{ property.description }}</p>
+
+            <h3>Location</h3>
+            <p>
+                {{ property.address }}<br>
+                {{ property.city }}, {{ property.state }} {{ property.zip_code }}<br>
+                {{ property.country }}
+            </p>
+
+            <h3>Features</h3>
+            <ul class="features-list">
+                {% for feature in property.features %}
+                    <li><i class="fas fa-check"></i> {{ feature }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Contact Form -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">Interested?</h3>
+                    <form id="inquiryForm" method="POST" action="{{ url_for('api.submit_inquiry', property_id=property.id) }}">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="phone" name="phone">
+                        </div>
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Send Inquiry</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('inquiryForm');
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(Object.fromEntries(formData)),
+            });
+            
+            if (response.ok) {
+                alert('Thank you for your inquiry! We will contact you soon.');
+                form.reset();
+            } else {
+                alert('There was an error submitting your inquiry. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('There was an error submitting your inquiry. Please try again.');
+        }
+    });
+});
+</script>
+{% endblock %}

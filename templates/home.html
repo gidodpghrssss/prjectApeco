@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Home - AI Real Estate{% endblock %}
+
+{% block content %}
+<div class="hero-section text-center py-5">
+    <h1>Find Your Dream Property with AI</h1>
+    <p class="lead">Let our AI-powered platform help you discover the perfect real estate opportunity</p>
+    <div class="mt-4">
+        <a href="{{ url_for('main.search') }}" class="btn btn-primary btn-lg">Start Searching</a>
+        <button onclick="toggleAIChat()" class="btn btn-outline-primary btn-lg ms-3">Get AI Assistance</button>
+    </div>
+</div>
+
+<section class="featured-properties my-5">
+    <h2 class="text-center mb-4">Featured Properties</h2>
+    <div class="row">
+        {% for property in latest_properties %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <img src="{{ property.images[0].url if property.images else url_for('static', filename='images/placeholder.jpg') }}" 
+                     class="card-img-top" alt="{{ property.title }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ property.title }}</h5>
+                    <p class="card-text">{{ property.description[:150] }}...</p>
+                    <p class="price-tag">${{ "{:,.2f}".format(property.price) }}</p>
+                    <ul class="property-features list-unstyled">
+                        <li><i class="fas fa-bed"></i> {{ property.bedrooms }} beds</li>
+                        <li><i class="fas fa-bath"></i> {{ property.bathrooms }} baths</li>
+                        <li><i class="fas fa-ruler-combined"></i> {{ property.square_feet }} sq ft</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-white border-top-0">
+                    <a href="{{ url_for('main.property_detail', property_id=property.id) }}" class="btn btn-primary w-100">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="latest-blog-posts my-5">
+    <h2 class="text-center mb-4">Latest Blog Posts</h2>
+    <div class="row">
+        {% for post in latest_posts %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ post.title }}</h5>
+                    <p class="card-text">{{ post.content[:200] }}...</p>
+                    <p class="text-muted">
+                        <small>Published {{ post.published_at.strftime('%B %d, %Y') }}</small>
+                    </p>
+                </div>
+                <div class="card-footer bg-white border-top-0">
+                    <a href="{{ url_for('main.blog_post', post_id=post.id) }}" class="btn btn-outline-primary w-100">Read More</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="cta-section text-center py-5 bg-light">
+    <h2>Ready to Find Your Next Property?</h2>
+    <p class="lead">Our AI-powered platform makes it easier than ever to find the perfect real estate opportunity.</p>
+    <div class="mt-4">
+        <a href="{{ url_for('main.search') }}" class="btn btn-primary btn-lg">Search Properties</a>
+        <button onclick="toggleAIChat()" class="btn btn-outline-primary btn-lg ms-3">Ask AI Assistant</button>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleAIChat() {
+    const aiChat = document.querySelector('#ai-chat');
+    if (aiChat && aiChat.__vue__) {
+        aiChat.__vue__.toggleChat();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Add any custom JavaScript for the home page here
+});
+</script>
+{% endblock %}
