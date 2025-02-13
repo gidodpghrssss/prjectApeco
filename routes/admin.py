@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from models.database import db, BlogPost, Property, User, Inquiry
 from services.blog_generator import BlogGeneratorService
 from services.deal_maker import DealMakerService
+from services.admin_ai_assistant import AdminAIAssistant
 import os
 from datetime import datetime, timedelta
 import schedule
@@ -12,6 +13,7 @@ import time
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 blog_generator = BlogGeneratorService()
 deal_maker = DealMakerService()
+ai_assistant = AdminAIAssistant()
 
 def check_admin():
     return current_user.is_authenticated and current_user.role == 'admin'
@@ -131,6 +133,63 @@ def create_property():
             flash(f'Error creating property: {str(e)}', 'error')
             
     return render_template('admin/create_property.html')
+
+@admin_bp.route('/ai-assistant', methods=['POST'])
+@login_required
+def ai_assistant_command():
+    if not check_admin():
+        return jsonify({"status": "error", "message": "Admin access required"}), 403
+    
+    command = request.json.get('command')
+    if not command:
+        return jsonify({"status": "error", "message": "No command provided"}), 400
+    
+    result = ai_assistant.process_command(command)
+    return jsonify(result)
+
+@admin_bp.route('/recent-activity')
+@login_required
+def recent_activity():
+    if not check_admin():
+        return jsonify([]), 403
+    
+    # Get recent activities from various sources
+    recent_properties = Property.query.order_by(Property.created_at.desc()).limit(5).all()
+    recent_inquiries = Inquiry.query.order_by(Inquiry.created_at.desc()).limit(5).all()
+    recent_users = User.query.order_by(User.created_at.desc()).limit(5).all()
+    
+    activities = []
+    
+    for prop in recent_properties:
+        activities.append({
+            "date": prop.created_at.strftime("%Y-%m-%d %H:%M"),
+            "type": "Property",
+            "description": f"New property listed: {prop.title}",
+            "status": prop.status,
+            "status_class": "success" if prop.status == "available" else "secondary"
+        })
+    
+    for inquiry in recent_inquiries:
+        activities.append({
+            "date": inquiry.created_at.strftime("%Y-%m-%d %H:%M"),
+            "type": "Inquiry",
+            "description": f"New inquiry from {inquiry.user_email}",
+            "status": inquiry.status,
+            "status_class": "warning" if inquiry.status == "new" else "info"
+        })
+    
+    for user in recent_users:
+        activities.append({
+            "date": user.created_at.strftime("%Y-%m-d %H:%M"),
+            "type": "User",
+            "description": f"New user registered: {user.email}",
+            "status": "active",
+            "status_class": "primary"
+        })
+    
+    # Sort by date
+    activities.sort(key=lambda x: datetime.strptime(x["date"], "%Y-%m-%d %H:%M"), reverse=True)
+    return jsonify(activities[:10])  # Return most recent 10 activities
 
 def get_blog_categories():
     return [

@@ -39,6 +39,21 @@ def property_detail(property_id):
 
 @main_bp.route('/api/search', methods=['POST'])
 def property_search_api():
-    query = request.json.get('query', '')
-    results = property_search.search(query)
-    return jsonify(results)
+    data = request.json or {}
+    filters = {
+        'query': data.get('query', ''),
+        'status': data.get('status'),
+        'min_price': data.get('min_price'),
+        'max_price': data.get('max_price'),
+        'location': data.get('location')
+    }
+    results = property_search.search(filters)
+    return jsonify([{
+        'id': p.id,
+        'title': p.title,
+        'description': p.description,
+        'price': p.price,
+        'location': p.location,
+        'status': p.status,
+        'images': [img.url for img in p.images] if hasattr(p, 'images') else []
+    } for p in results])

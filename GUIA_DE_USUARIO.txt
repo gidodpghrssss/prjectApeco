@@ -1,0 +1,190 @@
+===========================================
+GUÍA DE USUARIO - AI REAL ESTATE
+===========================================
+
+ÍNDICE
+------------------------------------------
+1. Introducción
+2. Guía para Administradores
+3. Guía para Usuarios
+4. Guía para Desarrolladores
+5. Configuración y Despliegue
+6. Solución de Problemas
+
+1. INTRODUCCIÓN
+------------------------------------------
+AI Real Estate es una plataforma moderna de bienes raíces que utiliza inteligencia artificial para mejorar la experiencia de búsqueda y gestión de propiedades. La aplicación está construida con Flask y PostgreSQL, y está diseñada para ser fácil de usar tanto para administradores como para usuarios finales.
+
+2. GUÍA PARA ADMINISTRADORES
+------------------------------------------
+
+2.1 Acceso al Panel de Administración
+• URL: /auth/login
+• Credenciales por defecto:
+  - Email: admin@airealestate.com
+  - Contraseña: admin123
+  IMPORTANTE: Cambiar la contraseña después del primer inicio de sesión
+
+2.2 Gestión de Propiedades
+• Agregar Nueva Propiedad:
+  1. Ir a "Agregar Propiedad"
+  2. Completar los campos requeridos:
+     - Título
+     - Descripción
+     - Precio
+     - Ubicación
+     - Características
+     - Imágenes (máximo 5 por propiedad)
+  3. Guardar los cambios
+
+• Editar Propiedad:
+  1. Localizar la propiedad en el listado
+  2. Hacer clic en "Editar"
+  3. Modificar los campos necesarios
+  4. Guardar cambios
+
+• Eliminar Propiedad:
+  1. Localizar la propiedad
+  2. Hacer clic en "Eliminar"
+  3. Confirmar la eliminación
+
+2.3 Gestión de Blog
+• Crear Entrada:
+  1. Ir a "Blog" > "Nueva Entrada"
+  2. Completar título y contenido
+  3. Agregar imágenes si es necesario
+  4. Publicar
+
+• Moderar Comentarios:
+  1. Ir a "Blog" > "Comentarios"
+  2. Aprobar/Rechazar comentarios
+  3. Eliminar spam
+
+2.4 Gestión de Usuarios
+• Ver listado de usuarios registrados
+• Modificar roles de usuario
+• Desactivar cuentas si es necesario
+
+3. GUÍA PARA USUARIOS
+------------------------------------------
+
+3.1 Búsqueda de Propiedades
+• Usar el buscador principal:
+  - Filtrar por ubicación
+  - Filtrar por precio
+  - Filtrar por características
+  - Usar búsqueda por IA (escribir en lenguaje natural)
+
+3.2 Visualización de Propiedades
+• Ver detalles completos
+• Galería de imágenes
+• Información de contacto
+• Características destacadas
+• Ubicación en mapa
+
+3.3 Contacto
+• Formulario de contacto por propiedad
+• Chat en vivo (si está disponible)
+• Programar visitas
+
+3.4 Blog y Comentarios
+• Leer entradas del blog
+• Comentar en entradas
+• Compartir en redes sociales
+
+4. GUÍA PARA DESARROLLADORES
+------------------------------------------
+
+4.1 Estructura del Proyecto
+/ai-real-estate
+├── admin/          # Funcionalidades de administración
+├── api/            # Endpoints de la API
+├── models/         # Modelos de la base de datos
+├── routes/         # Rutas de la aplicación
+├── services/       # Servicios y lógica de negocio
+├── static/         # Archivos estáticos
+└── templates/      # Plantillas HTML
+
+4.2 Tecnologías Principales
+• Backend: Flask (Python)
+• Base de datos: PostgreSQL
+• Frontend: HTML, CSS, JavaScript
+• IA: OpenAI API
+• Despliegue: Render
+
+4.3 Configuración del Entorno de Desarrollo
+1. Clonar el repositorio:
+   git clone [URL_DEL_REPOSITORIO]
+
+2. Crear entorno virtual:
+   python -m venv venv
+   source venv/bin/activate (Linux/Mac)
+   venv\Scripts\activate (Windows)
+
+3. Instalar dependencias:
+   pip install -r requirements.txt
+
+4. Configurar variables de entorno:
+   Crear archivo .env con:
+   - SECRET_KEY
+   - DATABASE_URL
+   - NEBIUS_API_KEY
+
+5. Inicializar la base de datos:
+   python init_db.py
+
+4.4 Convenciones de Código
+• Seguir PEP 8 para Python
+• Documentar todas las funciones
+• Usar tipos estáticos cuando sea posible
+• Mantener archivos de prueba actualizados
+
+5. CONFIGURACIÓN Y DESPLIEGUE
+------------------------------------------
+
+5.1 Requisitos del Sistema
+• Python 3.8 o superior
+• PostgreSQL 12 o superior
+• pip (gestor de paquetes de Python)
+• Git
+
+5.2 Despliegue en Render
+1. Conectar con GitHub
+2. Configurar variables de entorno
+3. Configurar base de datos PostgreSQL
+4. Activar el despliegue automático
+
+5.3 Mantenimiento
+• Realizar backups regulares
+• Monitorear logs
+• Actualizar dependencias
+• Revisar seguridad
+
+6. SOLUCIÓN DE PROBLEMAS
+------------------------------------------
+
+6.1 Problemas Comunes y Soluciones
+
+• Error de conexión a la base de datos:
+  1. Verificar DATABASE_URL
+  2. Comprobar que PostgreSQL está activo
+  3. Verificar permisos de usuario
+
+• Errores de carga de imágenes:
+  1. Verificar permisos de directorio
+  2. Comprobar tamaño máximo
+  3. Verificar formatos permitidos
+
+• Problemas de autenticación:
+  1. Limpiar cookies
+  2. Resetear contraseña
+  3. Verificar roles de usuario
+
+6.2 Contacto de Soporte
+Para problemas técnicos:
+• Email: soporte@airealestate.com
+• GitHub Issues: [URL_DEL_REPOSITORIO]/issues
+
+===========================================
+Última actualización: 13/02/2025
+===========================================

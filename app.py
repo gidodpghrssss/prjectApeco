@@ -3,17 +3,61 @@ from flask_login import LoginManager
 from dotenv import load_dotenv
 from models import db, User, Property, BlogPost
 import os
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:postgres@localhost:5432/ai_real_estate')
+
+# Handle Render PostgreSQL database URL
+database_url = os.getenv('DATABASE_URL')
+logger.info(f"Initial DATABASE_URL: {database_url}")
+
+if not database_url:
+    logger.error("No DATABASE_URL environment variable found!")
+    database_url = 'postgresql://postgres:postgres@localhost:5432/ai_real_estate'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+logger.info(f"Final SQLALCHEMY_DATABASE_URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize extensions
-db.init_app(app)
+try:
+    db.init_app(app)
+    with app.app_context():
+        # Test the database connection
+        db.engine.connect()
+        logger.info("Successfully connected to the database")
+        
+        # Create tables
+        db.create_all()
+        logger.info("Database tables created successfully")
+
+        # Create admin user if it doesn't exist
+        admin = User.query.filter_by(email='admin@airealestate.com').first()
+        if not admin:
+            admin = User(
+                email='admin@airealestate.com',
+                name='Admin User',
+                role='admin'
+            )
+            admin.set_password('admin123')  # You should change this password
+            db.session.add(admin)
+            db.session.commit()
+            logger.info("Admin user created successfully")
+        else:
+            logger.info("Admin user already exists")
+
+except Exception as e:
+    logger.error(f"Error initializing database: {str(e)}")
+    raise
+
 login_manager = LoginManager(app)
 login_manager.login_view = 'auth.login'
 
@@ -42,6 +86,4 @@ def internal_error(error):
     return render_template('500.html'), 500
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()  # Create database tables
     app.run(debug=True)

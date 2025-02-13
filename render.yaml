@@ -3,7 +3,7 @@ services:
     name: ai-real-estate
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    startCommand: gunicorn app:app --log-level debug
     envVars:
       - key: PYTHON_VERSION
         value: 3.8.0
@@ -11,6 +11,12 @@ services:
         fromDatabase:
           name: ai_real_estate_db
           property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FLASK_ENV
+        value: production
+      - key: GUNICORN_CMD_ARGS
+        value: "--workers=2 --threads=4 --timeout=120"
 
 databases:
   - name: ai_real_estate_db

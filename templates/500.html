@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <h1 class="display-1 text-danger">500</h1>
+            <h2 class="mb-4">¡Oops! Algo salió mal</h2>
+            <p class="lead mb-4">Nuestro equipo ha sido notificado y estamos trabajando para resolver el problema.</p>
+            <div class="mb-4">
+                <img src="{{ url_for('static', filename='img/error.svg') }}" alt="Error Illustration" class="img-fluid" style="max-width: 300px;">
+            </div>
+            <div>
+                <a href="{{ url_for('main.home') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-home mr-2"></i> Volver al Inicio
+                </a>
+                <button onclick="window.location.reload()" class="btn btn-outline-primary btn-lg ml-3">
+                    <i class="fas fa-redo mr-2"></i> Intentar de Nuevo
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
