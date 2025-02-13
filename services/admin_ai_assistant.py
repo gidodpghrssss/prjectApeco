@@ -10,7 +10,7 @@ class AdminAIAssistant:
             r'update (?P<field>\w+) of property (?:ID )?(?P<id>\d+) to (?P<value>.+)': self.update_property,
             r'delete (?:all )?(?P<type>\w+)(?: older than (?P<age>\d+) (?P<unit>\w+))?': self.delete_items,
             r'generate (?:a )?report of (?P<report_type>.+)': self.generate_report,
-            r'create (?:new )?property': self.create_property,
+            r'create (?:new )?property(?: with )?(?P<details>.+)?': self.create_property,
             r'show (?:all )?users': self.show_users,
             r'show (?:all )?inquiries': self.show_inquiries,
         }
@@ -45,6 +45,48 @@ class AdminAIAssistant:
                 } for p in properties
             ]
         }
+
+    def create_property(self, details=None):
+        """Create a new property with optional details"""
+        try:
+            property_data = {
+                'title': 'New Property',
+                'description': 'Property description',
+                'price': 0,
+                'location': 'Unknown',
+                'status': 'available'
+            }
+
+            if details:
+                pairs = [pair.strip() for pair in details.split(',')]
+                for pair in pairs:
+                    if ':' in pair:
+                        key, value = pair.split(':', 1)
+                        key = key.strip().lower()
+                        value = value.strip()
+                        if key == 'price':
+                            value = float(value.replace('$', '').replace(',', ''))
+                        if key in property_data:
+                            property_data[key] = value
+
+            new_property = Property(**property_data)
+            db.session.add(new_property)
+            db.session.commit()
+
+            return {
+                "status": "success",
+                "message": f"Created new property: {new_property.title}",
+                "data": {
+                    "id": new_property.id,
+                    "title": new_property.title,
+                    "price": new_property.price,
+                    "location": new_property.location,
+                    "status": new_property.status
+                }
+            }
+        except Exception as e:
+            db.session.rollback()
+            return {"status": "error", "message": f"Error creating property: {str(e)}"}
 
     def update_property(self, field, id, value):
         """Update a specific field of a property"""
@@ -99,7 +141,6 @@ class AdminAIAssistant:
         """Generate various types of reports"""
         try:
             if 'sales' in report_type:
-                # Extract quarter and year if specified
                 match = re.search(r'Q(\d) (\d{4})', report_type)
                 if match:
                     quarter = int(match.group(1))
@@ -124,7 +165,6 @@ class AdminAIAssistant:
                             "average_price": f"${(total_value/total_sales if total_sales else 0):,.2f}"
                         }
                     }
-            
             return {"status": "error", "message": "Report type not supported"}
         except Exception as e:
             return {"status": "error", "message": str(e)}
