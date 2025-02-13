@@ -2,15 +2,13 @@ from flask import Blueprint, render_template, jsonify, request, current_app, url
 from flask_login import login_required, current_user
 from datetime import datetime
 from models.database import db, Property, User, BlogPost, Inquiry
-from services.admin_ai_assistant import AdminAIAssistant
 
 admin_bp = Blueprint('admin', __name__)
-ai_assistant = AdminAIAssistant()
 
 @admin_bp.route('/dashboard')
 @login_required
 def dashboard():
-    if not current_user.is_admin:
+    if current_user.role != 'admin':
         return render_template('errors/403.html'), 403
         
     stats = {
@@ -24,7 +22,7 @@ def dashboard():
 @admin_bp.route('/properties')
 @login_required
 def properties():
-    if not current_user.is_admin:
+    if current_user.role != 'admin':
         return render_template('errors/403.html'), 403
     properties = Property.query.order_by(Property.created_at.desc()).all()
     return render_template('admin/properties.html', properties=properties)
@@ -32,7 +30,7 @@ def properties():
 @admin_bp.route('/properties/<int:id>')
 @login_required
 def get_property(id):
-    if not current_user.is_admin:
+    if current_user.role != 'admin':
         return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
     property = Property.query.get_or_404(id)
     return jsonify({
@@ -43,7 +41,7 @@ def get_property(id):
 @admin_bp.route('/properties', methods=['POST'])
 @login_required
 def create_property():
-    if not current_user.is_admin:
+    if current_user.role != 'admin':
         return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
     data = request.get_json()
     property = Property(
@@ -60,7 +58,7 @@ def create_property():
 @admin_bp.route('/properties/<int:id>', methods=['PUT'])
 @login_required
 def update_property(id):
-    if not current_user.is_admin:
+    if current_user.role != 'admin':
         return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
     property = Property.query.get_or_404(id)
     data = request.get_json()
@@ -75,7 +73,7 @@ def update_property(id):
 @admin_bp.route('/properties/<int:id>', methods=['DELETE'])
 @login_required
 def delete_property(id):
-    if not current_user.is_admin:
+    if current_user.role != 'admin':
         return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
     property = Property.query.get_or_404(id)
     db.session.delete(property)
@@ -85,7 +83,7 @@ def delete_property(id):
 @admin_bp.route('/blog')
 @login_required
 def blog():
-    if not current_user.is_admin:
+    if current_user.role != 'admin':
         return render_template('errors/403.html'), 403
     posts = BlogPost.query.order_by(BlogPost.created_at.desc()).all()
     return render_template('admin/blog.html', posts=posts)
@@ -93,7 +91,7 @@ def blog():
 @admin_bp.route('/inquiries')
 @login_required
 def inquiries():
-    if not current_user.is_admin:
+    if current_user.role != 'admin':
         return render_template('errors/403.html'), 403
     inquiries = Inquiry.query.order_by(Inquiry.created_at.desc()).all()
     return render_template('admin/inquiries.html', inquiries=inquiries)
@@ -101,14 +99,14 @@ def inquiries():
 @admin_bp.route('/settings')
 @login_required
 def settings():
-    if not current_user.is_admin:
+    if current_user.role != 'admin':
         return render_template('errors/403.html'), 403
     return render_template('admin/settings.html')
 
 @admin_bp.route('/recent-activity')
 @login_required
 def recent_activity():
-    if not current_user.is_admin:
+    if current_user.role != 'admin':
         return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
         
     try:
@@ -126,7 +124,7 @@ def recent_activity():
         recent_inquiries = Inquiry.query.order_by(Inquiry.created_at.desc()).limit(5).all()
         inquiry_activities = [{
             'type': 'inquiry',
-            'title': f'New inquiry from {i.user_email}',
+            'title': f'New inquiry from {i.email}',
             'action': 'received',
             'date': i.created_at.strftime("%Y-%m-%d %H:%M") if i.created_at else datetime.now().strftime("%Y-%m-%d %H:%M"),
             'url': url_for('admin.inquiries')
@@ -168,18 +166,3 @@ def recent_activity():
             'date': datetime.now().strftime("%Y-%m-%d %H:%M"),
             'url': '#'
         }])
-
-@admin_bp.route('/ai-assistant', methods=['POST'])
-@login_required
-def ai_assistant_command():
-    if not current_user.is_admin:
-        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
-        
-    data = request.get_json()
-    command = data.get('command')
-    
-    if not command:
-        return jsonify({"status": "error", "message": "No command provided"})
-        
-    result = ai_assistant.process_command(command)
-    return jsonify(result)
