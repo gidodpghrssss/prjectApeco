@@ -1,12 +1,12 @@
 :root {
-    --primary-color: #2E7D32;      /* Deep professional green */
-    --primary-light: #4CAF50;      /* Lighter green for hover */
-    --secondary-color: #C62828;    /* Deep professional red */
-    --secondary-light: #E57373;    /* Lighter red for accents */
-    --accent-color: #81C784;       /* Soft green for success states */
-    --accent-secondary: #FF8A80;   /* Soft red for warnings/alerts */
-    --text-color: #263238;         /* Dark blue-grey for text */
-    --text-light: #546E7A;         /* Lighter text for secondary content */
+    --primary-color: #8B0000;      /* APEKO burgundy red */
+    --primary-light: #A52A2A;      /* Lighter burgundy for hover */
+    --secondary-color: #808080;    /* APEKO grey */
+    --secondary-light: #A9A9A9;    /* Lighter grey for accents */
+    --accent-color: #D3D3D3;       /* Light grey for success states */
+    --accent-secondary: #CD5C5C;   /* Indian red for warnings/alerts */
+    --text-color: #2F4F4F;         /* Dark slate grey for text */
+    --text-light: #696969;         /* Dim grey for secondary content */
     --light-bg: #F5F5F5;           /* Light background */
     --white: #FFFFFF;
     --border-color: #E0E0E0;
@@ -252,7 +252,7 @@ body {
 /* Form Elements */
 .form-control:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(46, 125, 50, 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(139, 0, 0, 0.25);
 }
 
 /* Price Tags */
